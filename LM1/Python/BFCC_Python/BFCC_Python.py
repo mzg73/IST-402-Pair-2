@@ -23,8 +23,8 @@ def decrypt(ciphertext, key): #This function is used to decrypt the ciphertext i
             plaintext += char
     return plaintext
 
-
-for i in range(0, 10): # The key is 5. The program will brute-force and try each number until it finds the key to display the message.
+#decrypt() will only run once the key is guessed by the program
+for i in range(0, 10): # The key is 5. The program will brute-force and try each number until it finds the key to display the message from 0-10.
     if i == key:
         plaintext = decrypt(ciphertext, key)
         print(i, " was the key, brute force success")
