@@ -2,7 +2,6 @@ import string
 
 ciphertext = "Mjqqt NXY 402"  # This is a ciphertext version of the plaintext "Hello IST 402"
 key = 5  # The key to be guessed is 5
-
 alphabet_lower = string.ascii_lowercase  # lowercase alphabet
 alphabet_upper = string.ascii_uppercase  # uppercase alphabet
 
