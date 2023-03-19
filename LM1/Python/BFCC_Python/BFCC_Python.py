@@ -6,7 +6,7 @@ alphabet_lower = string.ascii_lowercase  # lowercase alphabet
 alphabet_upper = string.ascii_uppercase  # uppercase alphabet
 
 
-def decrypt(ciphertext, key):
+def decrypt(ciphertext, key): #This function is used to decrypt the ciphertext into plaintext
     plaintext = ""
     for char in ciphertext:
         if char in alphabet_lower:
@@ -18,7 +18,7 @@ def decrypt(ciphertext, key):
     return plaintext
 
 
-for i in range(0, 10):
+for i in range(0, 10): # The key is 5. The program will brute-force and try each number until it finds the key to display the message.
     if i == key:
         plaintext = decrypt(ciphertext, key)
         print(i, " was the key, brute force success")
