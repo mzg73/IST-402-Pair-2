@@ -1,3 +1,10 @@
+#Project: Brute Force using Python
+#Date: 3/19/2023
+#Author: Marcus Gonzalez
+#Course: IST 402
+#Date Developed: 3/19/2023
+#Date Last Changed: 3/19/2023
+
 import string
 
 ciphertext = "Mjqqt NXY 402"  # This is a ciphertext version of the plaintext "Hello IST 402"
