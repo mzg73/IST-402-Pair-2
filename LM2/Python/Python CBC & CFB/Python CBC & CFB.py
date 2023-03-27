@@ -87,7 +87,7 @@ def ECB_Mode():
     x = 0
     for i in range(4):
         xor = message[x]                                                                            # We don't have a XOR function to execute, so we'll just use this as a place to store the message in
-        lookupValue = codebookLookup(xor, ECB_codebooks["page2"])
+        lookupValue = codebookLookup(xor, ECB_codebooks["page1"])
         print("The ciphered value of " + str(bin(message[x])) + " is", bin(lookupValue)[2:])
         x += 1
 
