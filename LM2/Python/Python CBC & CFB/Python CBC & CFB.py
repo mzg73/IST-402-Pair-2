@@ -2,7 +2,13 @@
 # Besides the binary representation, the decimal representation of the codebook is "[[0, 1], [1, 2], [2, 3], [3, 0]]"
 # Remember that this 2D array will be represented in a loop as "codebook[i][j]".
 # Also remember that the first index, i, specifies the row number, while the second index, j, specifies the column number!
-codebook = [[0b00, 0b01], [0b01, 0b10], [0b10, 0b11], [0b11, 0b00]]
+typical_codebook = [[0b00, 0b01], [0b01, 0b10], [0b10, 0b11], [0b11, 0b00]]
+
+# ECB codebooks
+ECB_codebooks =  {
+    "page1": [[0b00, 0b01], [0b01, 0b10], [0b10, 0b11], [0b11, 0b00]],
+    "page2": [[0b00, 0b10], [0b01, 0b11], [0b10, 0b00], [0b11, 0b01]]
+    }
 
 # This is the message that we'll be sending. This isn't supposed to be some sort of meaningful plaintext message.
 # Besides the binary representation, the decimal representation of the message is "[0, 1, 2, 3]"
@@ -12,23 +18,25 @@ message = [0b00, 0b01, 0b10, 0b11]
 # Besides the binary representation, the decimal representation of the message is "2"
 iv = 0b10
 
-
+# Cipher / Decipher tables from the lecture
+#
 #                                              In   | Out
 # -------------         -------------       --------------
-# | 00 --> 01 |         | 00 --> 01 |       | 0; 0  | 0  |
-# | 01 --> 10 |         | 01 --> 10 |       | 0; 1  | 1  |
-# | 10 --> 11 |         | 10 --> 11 |       | 1; 0  | 1  |
-# | 11 --> 00 |         | 11 --> 00 |       | 1; 1  | 0  |
+# | 00 --> 01 |         | 00 --> 11 |       | 0; 0  | 0  |
+# | 01 --> 10 |         | 01 --> 00 |       | 0; 1  | 1  |
+# | 10 --> 11 |         | 10 --> 01 |       | 1; 0  | 1  |
+# | 11 --> 00 |         | 11 --> 10 |       | 1; 1  | 0  |
 # -------------         -------------       ______________
 # XOR ENcryption        XOR DEcryption      XOR Operation Chart
 # for the message       for the message
 
-# In CBC, the codebook is the "key" the comes after the IV in the first block of plain text
-def codebookLookup(xor):
+# In CBC/OFB/CFB, the codebook is the "key" the comes after the IV in the first block of plain text
+# In ECB, the codebook acts as a direct translation of a message
+def codebookLookup(xor, codebook):
     lookupValue = None
     j = 0
-    for i in range(4):               # Loop through four times. Increment the codebook row, which is i, by 1
-        if codebook[i][j] == xor:    # If the XOR value is equal to the
+    for i in range(4):                                                           # Loop through four times. Increment the codebook row, which is i, by 1
+        if codebook[i][j] == xor:                                                # If the XOR value is equal to the XOR value, break from the loop and return back its new encrypted / decrypted form
             j += 1
             lookupValue = codebook[i][j]
             break
@@ -37,15 +45,15 @@ def codebookLookup(xor):
 
 # CBC Mode
 def CBC_Mode():
-    x = 0                                                       # The current plaintext block
-    lookupValue = 0                                             # For this method, this stores the encrypted result of a xor after being modified in the codebook.
-    for i in range(4):                                          # Loop through four times. Just keep in mind that the "xor" value stores the value of a XOR function, which triggers upon the usage of a "^" symbol.
-        if x == 0:                                              # If we are on the first block of plaintext, execute the XOR function between the current message block and iv. Ex: Comparing 0b00 (or message[1]) against 0b10 (or iv) would yield 0b10 (or just 2 in decimal)
+    x = 0                                                                         # The current plaintext block
+    lookupValue = 0                                                               # For this method, this stores the encrypted result of a xor after being modified in the codebook.
+    for i in range(4):                                                            # Loop through four times. Just keep in mind that the "xor" value stores the value of a XOR function, which triggers upon the usage of a "^" symbol.
+        if x == 0:                                                                # If we are on the first block of plaintext, execute the XOR function between the current message block and iv. Ex: Comparing 0b00 (or message[1]) against 0b10 (or iv) would yield 0b10 (or just 2 in decimal)
             xor = message[x] ^ iv
-        else:                                                   # If we are NOT on the first block of plaintext, execute the XOR function between the current message block and the lookupValue
+        else:                                                                     # If we are NOT on the first block of plaintext, execute the XOR function between the current message block and the lookupValue
             xor = message[x] ^ lookupValue
 
-        lookupValue = codebookLookup(xor)
+        lookupValue = codebookLookup(xor, typical_codebook)
         x += 1
         print("The ciphered value of a is", bin(lookupValue)[2:])
 
@@ -53,26 +61,36 @@ def CBC_Mode():
 # CFB Mode
 def CFB_Mode():
     x = 0
-    lookupValue = codebookLookup(iv)                            # This would be our key stream right here since this particular key was generated by using a block cipher encryption function with the IV as the input
+    lookupValue = codebookLookup(iv, typical_codebook)                            # This would be our key stream right here since this particular key was generated by using a block cipher encryption function with the IV as the input
 
     for i in range(4):
         xor = message[x] ^ lookupValue
-        lookupValue = codebookLookup(xor)                       # Regenerating a new key stream based for the upcoming block based off the initial IV, codebook key, and plaintext (the message in this case).
+        lookupValue = codebookLookup(xor, typical_codebook)                       # Regenerating a new key stream based for the upcoming block based off the initial IV, codebook key, and plaintext (the message in this case).
         x += 1
         print("The ciphered value of a is", bin(xor)[2:])
+
 
 # OFB Mode [Didn't have to do, but good to have it here anyway so that we can understand CBF better]
 def OFB_Mode():
     x = 0
-    lookupValue = codebookLookup(iv)                            # This would be our key stream right here since this particular key was generated by using a block cipher encryption function with the IV as the input
+    lookupValue = codebookLookup(iv, typical_codebook)                            # This would be our key stream right here since this particular key was generated by using a block cipher encryption function with the IV as the input
 
     for i in range(4):
 
         xor = message[x] ^ lookupValue
-        lookupValue = codebookLookup(lookupValue)               # Regenerating a new key stream based for the upcoming block based off the initial IV and codebook key.
-
+        lookupValue = codebookLookup(lookupValue, typical_codebook)               # Regenerating a new key stream based for the upcoming block based off the initial IV and codebook key.
         x += 1
         print("The ciphered value of a is", bin(xor)[2:])
+
+
+# ECB Mode [Again, kind of optional but still good to do it nonetheless. This just displays the contents of page 2]
+def ECB_Mode():
+    x = 0
+    for i in range(4):
+        xor = message[x]                                                           # We don't have a XOR function to execute, so we'll just use this as a place to store the message in
+        lookupValue = codebookLookup(xor, ECB_codebooks["page2"])
+        x += 1
+        print("The ciphered value of a is", bin(lookupValue)[2:])
 
 
 # Run the programs
@@ -83,3 +101,5 @@ if __name__ == "__main__":
     CFB_Mode()
     print("\n------------------------------\nOFB Mode\n------------------------------\n")
     OFB_Mode()
+    print("\n------------------------------\nECB Mode\n------------------------------\n")
+    ECB_Mode()
