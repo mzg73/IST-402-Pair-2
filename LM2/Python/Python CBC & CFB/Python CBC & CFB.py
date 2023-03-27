@@ -31,7 +31,7 @@ iv = 0b10
 # for the message       for the message
 
 # In CBC/OFB/CFB, the codebook is the "key" the comes after the IV in the first block of plain text
-# In ECB, the codebook acts as a direct translation of a message
+# In ECB, the codebook acts as a direct translation of a message. Simply put, the key is the only means to encrypting/decrypting a message
 def codebookLookup(xor, codebook):
     lookupValue = None
     j = 0
@@ -93,7 +93,7 @@ def ECB_Mode():
         print("The ciphered value of a is", bin(lookupValue)[2:])
 
 
-# Run the programs
+# Runs the program
 if __name__ == "__main__":
     print("\n------------------------------\nCBC Mode\n------------------------------\n")
     CBC_Mode()
