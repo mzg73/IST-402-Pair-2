@@ -39,10 +39,10 @@ func main() {
 	fmt.Printf("OFB: \n")
 	var y int = 0
 	var keystream int = iv
+	var output int
 	for y = 0; y < 4; y++ {
-		xor = message[y] ^ keystream
-		lookupValue = codebookLookup(xor)
-		keystream = codebookLookup(xor)
-		fmt.Printf("The ciphered value of a is %b\n", lookupValue)
+		keystream = codebookLookup(keystream)
+		output = keystream ^ message[y]
+		fmt.Printf("The ciphered value of a is %b\n", output)
 	}
 }
