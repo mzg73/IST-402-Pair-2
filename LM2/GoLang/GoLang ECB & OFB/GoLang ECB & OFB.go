@@ -31,18 +31,19 @@ func main() {
 	for i = 0; i < 4; i++ {
 		xor = message[x]
 		lookupValue = codebookLookup(xor)
+		fmt.Printf("The ciphered value of %b is %b\n", message[x], lookupValue)
 		x++
-		fmt.Printf("The ciphered value of a is %b\n", lookupValue)
+
 	}
 
 	// OFB Mode
-	fmt.Printf("OFB: \n")
+	fmt.Printf("\nOFB: \n")
 	var y int = 0
 	var keystream int = iv
 	var output int
 	for y = 0; y < 4; y++ {
 		keystream = codebookLookup(keystream)
 		output = keystream ^ message[y]
-		fmt.Printf("The ciphered value of a is %b\n", output)
+		fmt.Printf("The ciphered value of %b is %b\n", message[y], output)
 	}
 }
