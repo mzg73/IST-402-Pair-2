@@ -51,9 +51,19 @@ func main() {
 	var y int = 0
 	var keystream int = iv
 	var output int
+	var ciphertext [4]int
+	var plaintext [4]int
+	// Encryption
 	for y = 0; y < 4; y++ {
 		keystream = codebookLookup(2, keystream)
 		output = keystream ^ message[y]
+		ciphertext[y] = output
 		fmt.Printf("The ciphered value of %b is %b\n", message[y], output)
 	}
+	for y = 0; y < 4; y++ {
+		keystream = codebookLookup(2, keystream)
+		plaintext[y] = keystream ^ ciphertext[y]
+		fmt.Printf("The deciphered value of %b is %b\n", ciphertext[y], plaintext[y])
+	}
+
 }
