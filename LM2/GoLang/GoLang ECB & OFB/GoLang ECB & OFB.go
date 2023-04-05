@@ -60,6 +60,7 @@ func main() {
 		ciphertext[y] = output
 		fmt.Printf("The ciphered value of %b is %b\n", message[y], output)
 	}
+	// Decryption
 	for y = 0; y < 4; y++ {
 		keystream = codebookLookup(2, keystream)
 		plaintext[y] = keystream ^ ciphertext[y]
