@@ -64,7 +64,7 @@ func main() {
 	for y = 0; y < 4; y++ {
 		keystream = codebookLookup(2, keystream)
 		plaintext[y] = keystream ^ ciphertext[y]
-		fmt.Printf("The deciphered value of %b is %b\n", ciphertext[y], plaintext[y])
+		fmt.Printf("The plaintext value of %b is %b\n", ciphertext[y], plaintext[y])
 	}
 
 }
