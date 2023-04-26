@@ -1,41 +1,38 @@
 package main
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
+	"crypto/elliptic"
 	"crypto/rand"
-	"encoding/hex"
 	"fmt"
-	"io"
+	"math/big"
 )
 
 func main() {
-	message := "IST 402 message"
-	key, _ := hex.DecodeString("6368616e676520746869732070617373")
-	plaintext := []byte(message)
-
-	block, err := aes.NewCipher(key)
+	curve := elliptic.P256()
+	priv, x, y, err := elliptic.GenerateKey(curve, rand.Reader)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Printf("Private key: %x\n", priv)
 
-	ciphertext := make([]byte, aes.BlockSize+len(plaintext))
-
-	nonce := make([]byte, 16)
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err)
-	}
-
-	stream := cipher.NewCTR(block, nonce)
-	stream.XORKeyStream(ciphertext[aes.BlockSize:], plaintext)
-
+	message := "IST 402"
 	fmt.Printf("Message: %s\n", message)
-	fmt.Printf("Ciphertext: %x\n", ciphertext[aes.BlockSize:])
 
-	plaintext2 := make([]byte, len(plaintext))
+	// encrypt
+	plaintext := []byte(message)
+	k := new(big.Int).SetBytes(priv)              // convert private key to big.Int
+	x1, _ := curve.ScalarBaseMult(k.Bytes())      // calculate public key
+	y1, _ := curve.ScalarMult(x, y, k.Bytes())    // calculate shared secret
+	ciphertext := elliptic.Marshal(curve, x1, y1) // encode public key
+	ciphertext = append(ciphertext, plaintext...) // append plaintext to encoded public key
+	fmt.Printf("Ciphertext: %x\n", ciphertext)
 
-	stream = cipher.NewCTR(block, nonce)
-	stream.XORKeyStream(plaintext2, ciphertext[aes.BlockSize:])
-
-	fmt.Printf("Decrypted message: %s\n", plaintext2)
+	// decrypt
+	x1, y1 = elliptic.Unmarshal(curve, ciphertext[:curve.Params().BitSize/8+1])
+	sharedSecret, _ := curve.ScalarMult(x1, y1, priv)
+	decrypted := ciphertext[curve.Params().BitSize/8+1:]
+	for i := range decrypted {
+		decrypted[i] ^= sharedSecret.Bytes()[i%len(sharedSecret.Bytes())]
+	}
+	fmt.Printf("Decrypted: %s\n", string(decrypted))
 }
