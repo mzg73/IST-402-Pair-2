@@ -111,7 +111,7 @@ func main() {
 	leftRotor.position = 1
 
 	// Input message to encode
-	message := "IST 402"
+	message := "ISTFOURZEROTWO"
 
 	// Encode the message
 	encodedMessage := ""
