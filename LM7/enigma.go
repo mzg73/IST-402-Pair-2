@@ -7,10 +7,6 @@ import (
 	"fmt"
 )
 
-func encoded() {
-
-}
-
 // Reflector represents the fixed reflector
 type Reflector struct {
 	wiring [26]int
@@ -29,11 +25,20 @@ type EnigmaMachine struct {
 	inputRotor *InputRotor
 }
 
-func rotate(r *Rotor) {
+/** func (e *EnigmaMachine) rotate(r *Rotor) {
 	r.position = (r.position + 1) % 26
 	r.wiring[0], r.wiring[25] = r.wiring[25], r.wiring[0]
-	r.wiring[0], r.wiring[r.position] = r.wiring[r.position], r.wiring[0]
+	r.wiring[0], r.wiring[r.position] = r.wiring[r.position], r.wiring[0]        <------- OLD ROTATE FUNCTION
 	r.wiring[25], r.wiring[r.position] = r.wiring[r.position], r.wiring[25]
+} **/
+
+func (s RotorSet) rotate(r *Rotor, steps int) {
+	for i := 0; i < steps; i++ {
+		r.position = (r.position + 1) % 26
+		r.wiring[0], r.wiring[25] = r.wiring[25], r.wiring[0]
+		r.wiring[0], r.wiring[r.position] = r.wiring[r.position], r.wiring[0]
+		r.wiring[25], r.wiring[r.position] = r.wiring[r.position], r.wiring[25]
+	}
 }
 
 // encoded method for EnigmaMachine
@@ -42,7 +47,7 @@ func (e *EnigmaMachine) encoded(c byte) byte {
 	c = byte(e.plugboard.wiring[c-'A']) + 'A'
 
 	// Rotate the rotors
-	//e.rotorSet.rotate() <------------- ERROR IS HERE. we have to create a rotate method or something.
+	e.rotorSet.rotate(e.rotorSet.Rightrotor, 6)
 
 	// Pass the character through the input rotor
 	c = byte(e.inputRotor.wiring[c-'A']) + 'A'
