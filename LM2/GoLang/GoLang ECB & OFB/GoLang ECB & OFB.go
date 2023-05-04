@@ -10,10 +10,10 @@ var codebook = [4][2]int{{0b00, 0b01}, {0b01, 0b10}, {0b10, 0b11}, {0b11, 0b00}}
 var codebook2 = [4][2]int{{0b00, 0b10}, {0b01, 0b11}, {0b10, 0b00}, {0b11, 0b01}}
 var message = [4]int{0b00, 0b01, 0b10, 0b11}
 var message2 = []int{}
-var iv int = 0b10
+var iv = 0b10
 
 func codebookLookup(codebookNum int, xor int) (lookupValue int) {
-	var i, j int = 0, 0
+	var i, j = 0, 0
 	for i = 0; i < 4; i++ {
 		if codebook[i][j] == xor {
 			j++
@@ -31,8 +31,8 @@ func codebookLookup(codebookNum int, xor int) (lookupValue int) {
 func main() {
 	// ECB Mode
 	fmt.Printf("ECB: \n")
-	var x, i int = 0, 0
-	var lookupValue int = 0
+	var x, i = 0, 0
+	var lookupValue = 0
 	for i = 0; i < 4; i++ {
 		lookupValue = codebookLookup(2, message[x])
 		fmt.Printf("The ciphered value of %b is %b\n", message[x], lookupValue)
@@ -48,8 +48,8 @@ func main() {
 
 	// OFB Mode
 	fmt.Printf("\nOFB: \n")
-	var y int = 0
-	var keystream int = iv
+	var y = 0
+	var keystream = iv
 	var output int
 	var ciphertext [4]int
 	var plaintext [4]int

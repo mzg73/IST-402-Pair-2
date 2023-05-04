@@ -1,5 +1,4 @@
 // Structures used are from LM5 Assignment
-
 package main
 
 import (
@@ -25,13 +24,6 @@ type EnigmaMachine struct {
 	inputRotor *InputRotor
 }
 
-/** func (e *EnigmaMachine) rotate(r *Rotor) {
-	r.position = (r.position + 1) % 26
-	r.wiring[0], r.wiring[25] = r.wiring[25], r.wiring[0]
-	r.wiring[0], r.wiring[r.position] = r.wiring[r.position], r.wiring[0]        <------- OLD ROTATE FUNCTION
-	r.wiring[25], r.wiring[r.position] = r.wiring[r.position], r.wiring[25]
-} **/
-
 func (s RotorSet) rotate(r *Rotor, steps int) {
 	for i := 0; i < steps; i++ {
 		r.position = (r.position + 1) % 26
@@ -46,8 +38,10 @@ func (e *EnigmaMachine) encoded(c byte) byte {
 	// Pass the character through the plugboard
 	c = byte(e.plugboard.wiring[c-'A']) + 'A'
 
-	// Rotate the rotors
+	// Rotate the rotors (One motor isn't dependent on another to rotate; they all rotate whenever each letter is analyzed)
 	e.rotorSet.rotate(e.rotorSet.Rightrotor, 6)
+	e.rotorSet.rotate(e.rotorSet.Middlerotor, 3)
+	e.rotorSet.rotate(e.rotorSet.Leftrotor, 2)
 
 	// Pass the character through the input rotor
 	c = byte(e.inputRotor.wiring[c-'A']) + 'A'
@@ -68,7 +62,7 @@ func (e *EnigmaMachine) encoded(c byte) byte {
 	// Pass the character back through the input rotor
 	c = byte(e.inputRotor.wiring[c-'A']) + 'A'
 
-	// Pass the character back through the plugboard
+	// Pass the character back through the plug board
 	c = byte(e.plugboard.wiring[c-'A']) + 'A'
 
 	return c
@@ -92,8 +86,27 @@ type InputRotor struct {
 	wiring [26]int
 }
 
+// XOR each letter of the string
+func xorString(s string, key string) string {
+	// Convert the string and key to byte slices
+	sBytes := []byte(s)
+	keyBytes := []byte(key)
+
+	// XOR each byte in the string with the corresponding byte in the key
+	xoredBytes := make([]byte, len(sBytes))
+	for i := 0; i < len(sBytes); i++ {
+		xoredBytes[i] = sBytes[i] ^ keyBytes[i%len(keyBytes)]
+	}
+
+	// Convert the XORed bytes back to a string
+	xoredString := string(xoredBytes)
+
+	return xoredString
+}
+
 func main() {
 
+	// Set up the components
 	reflector := &Reflector{[26]int{4, 10, 12, 5, 11, 6, 3, 16, 21, 25, 13, 19, 14, 22, 24, 7, 23, 20, 18, 15, 0, 8, 1, 17, 2, 9}}
 	plugboard := &Plugboard{[26]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}}
 	rightRotor := &Rotor{[26]int{3, 7, 4, 20, 13, 16, 10, 22, 15, 2, 12, 19, 25, 5, 14, 23, 6, 24, 18, 21, 8, 1, 11, 17, 0, 9}, 0}
@@ -105,27 +118,26 @@ func main() {
 	rotorSet := &RotorSet{rightRotor, leftRotor, middleRotor}
 	enigma := &EnigmaMachine{plugboard, reflector, rotorSet, inputRotor}
 
-	// Set initial rotor positions
-	rightRotor.position = 5
-	middleRotor.position = 3
-	leftRotor.position = 1
-
 	// Input message to encode
 	message := "ISTFOURZEROTWO"
+	fmt.Println("Original message: ", message)
 
-	// Encode the message
+	// Encodes the message
 	encodedMessage := ""
 	for i := 0; i < len(message); i++ {
 		encodedChar := enigma.encoded(message[i])
 		encodedMessage += string(encodedChar)
 	}
 
-	// Reset rotor positions to initial state
-	rightRotor.position = 5
-	middleRotor.position = 3
-	leftRotor.position = 1
+	//XOR the final string (the special feature)
+	encodedMessage = xorString(encodedMessage, "secret")
+	fmt.Println("Encoded message: ", encodedMessage)
 
-	// Decode the message
+	//XOR the final string (reversing the initial XOR function)
+	encodedMessage = xorString(encodedMessage, "secret")
+
+	// Decodes the message (Shows that it is not the same as the plaintext)
+	// Note: We wanted to find a way to reset the rotors so that the decryption would show the actual plaintext, but we got stumped/ran out of time
 	decodedMessage := ""
 	for i := 0; i < len(encodedMessage); i++ {
 		decodedChar := enigma.encoded(encodedMessage[i])
@@ -133,7 +145,5 @@ func main() {
 	}
 
 	// Print the encoded and decoded messages
-	fmt.Println("Original message: ", message)
-	fmt.Println("Encoded message: ", encodedMessage)
 	fmt.Println("Decoded message: ", decodedMessage)
 }
